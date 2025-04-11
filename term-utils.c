@@ -6,20 +6,16 @@
 struct termios orig_stdin;
 bool stdin_modified = 0;
 
-// Pause output
 static inline void stdout_freeze()
 {
 	tcflow(STDOUT_FILENO, TCOOFF);
 }
 
-
-// Resume output
 static inline void stdout_thaw()
 {
 	tcflow(STDOUT_FILENO, TCOON);
 }
 
-// Switch terminal to raw mode to intercept input directly
 void stdin_raw()
 {
 	tcgetattr(STDIN_FILENO, &orig_stdin);
@@ -30,7 +26,6 @@ void stdin_raw()
 	atexit(stdin_revert);
 }
 
-// Restore default terminal behaviour (usually cooked mode)
 void stdin_revert()
 {
 	if (stdin_modified)

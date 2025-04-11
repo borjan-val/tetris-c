@@ -22,10 +22,16 @@
 #define BG_CYAN "\033[46m"
 #define BG_WHITE "\033[47m"
 
+// Pause output
 static inline void stdout_freeze();
+
+// Resume output
 static inline void stdout_thaw();
 
+// Switch terminal to raw mode to intercept input directly
 void stdin_raw();
+
+// Restore default terminal behaviour (usually cooked mode)
 void stdin_revert();
 
 #endif
