@@ -1,2 +1,2 @@
-# tetris-c
-A text mode clone of NES Tetris in kernel-style C
+# Text Mode NES Tetris
+This project is a recreation of NES Tetris written in kernel-style C23 targeting text mode Linux terminals.
