@@ -2,7 +2,7 @@
 A recreation of NES Tetris written in kernel-style C23 targeting text mode Linux terminals.
 
 ## Motivation
-This project is mostly made to practice exercising good code quality and best practices for C programming. It follows the [Linux Kernel coding style](https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/Documentation/process/coding-style.rst). Some inspiration is also taken from ["Writing C for curl"](https://daniel.haxx.se/blog/2025/04/07/writing-c-for-curl/), though the [Linux Kernel coding style](https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/Documentation/process/coding-style.rst) always takes precedent, for example in the case of indentation. Another notable exception is the use of C23 as opposed to C89 which `curl` restricts itself to.
+This project is mostly made to practice exercising good code quality and best practices for C programming. It follows the [Linux Kernel coding style](https://www.kernel.org/doc/html/latest/process/coding-style.html). Some inspiration is also taken from ["Writing C for curl"](https://daniel.haxx.se/blog/2025/04/07/writing-c-for-curl/), though the [Linux Kernel coding style](https://www.kernel.org/doc/html/latest/process/coding-style.html) always takes precedent, for example in the case of indentation. Another notable exception is the use of C23 as opposed to C89 which `curl` restricts itself to.
 
 Due to this focus on **best practices** and **maintainability**, issues or pull requests relating solely to functionality, e.g. furthering platform support, will have a very low priority and may be ignored.
 
