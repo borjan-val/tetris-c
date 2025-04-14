@@ -28,6 +28,9 @@ static inline void stdout_freeze();
 // Resume output
 static inline void stdout_thaw();
 
+// Ensure all terminal changes are undone on exit.
+void prep_term_utils();
+
 // Switch terminal to raw mode to intercept input directly
 void stdin_raw();
 
