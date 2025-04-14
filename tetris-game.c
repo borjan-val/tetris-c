@@ -94,6 +94,7 @@ struct tetris_game_result tetris_game_update(struct tetris_game *tgptr)
 {
 	struct tetris_game_result result;
 	result.game_ended = 0;
+	result.piece_dropped = 0;
 	result.lines_cleared[0] = 0xFF;
 	struct tetris_game_piece nextpc = tgptr->pc;
 	nextpc.y++;
@@ -102,6 +103,7 @@ struct tetris_game_result tetris_game_update(struct tetris_game *tgptr)
 		return result;
 	}
 	place_piece_down(tgptr);
+	result.piece_dropped = 1;
 	unsigned char size = 0;
 	for (unsigned char y = tgptr->pc.y; y < tgptr->pc.y + 4; y++) {
 		if (line_full(tgptr->board, y)) {
@@ -114,5 +116,42 @@ struct tetris_game_result tetris_game_update(struct tetris_game *tgptr)
 	tgptr->lines += size;
 	new_piece(tgptr);
 	result.game_ended = collides(tgptr->pc, tgptr->board);
+	return result;
+}
+
+struct tetris_game_result tetris_game_input(struct tetris_game *tgptr,
+					    enum tetris_game_input input)
+{
+	struct tetris_game_result result;
+	result.game_ended = 0;
+	result.lines_cleared[0] = 0xFF;
+	struct tetris_game_piece nextpc = tgptr->pc;
+	switch (input) {
+	case MOVE_LEFT:
+		nextpc.x--;
+		break;
+	case MOVE_RIGHT:
+		nextpc.x++;
+		break;
+	case SOFT_DROP:
+		nextpc.y++;
+		break;
+	case HARD_DROP:
+		struct tetris_game_result r = tetris_game_update(tgptr);
+		while (!r.piece_dropped) {
+			r = tetris_game_update(tgptr);
+		}
+		return r;
+	case ROTATE_CW:
+		nextpc.rot = nextpc.rot + 1 % 4;
+		break;
+	case ROTATE_CCW:
+		nextpc.rot = nextpc.rot + 3 % 4;
+		break;
+	default:
+		return result;
+	}
+	if (!collides(nextpc, tgptr->board))
+		tgptr->pc = nextpc;
 	return result;
 }
