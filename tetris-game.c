@@ -141,10 +141,10 @@ struct tetris_game_result tetris_game_input(struct tetris_game *tgptr,
 		}
 		return r;
 	case ROTATE_CW:
-		nextpc.rot = nextpc.rot + 1 % 4;
+		nextpc.rot = (nextpc.rot + 1) % 4;
 		break;
 	case ROTATE_CCW:
-		nextpc.rot = nextpc.rot + 3 % 4;
+		nextpc.rot = (nextpc.rot + 3) % 4;
 		break;
 	default:
 		return result;
