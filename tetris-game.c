@@ -2,6 +2,13 @@
 #include <stdlib.h>
 #include <time.h>
 
+static inline void seed_random()
+{
+	struct timespec ts;
+	timespec_get(&ts, TIME_UTC);
+	srand(ts.tv_sec + ts.tv_nsec);
+}
+
 static inline bool cell_out_of_bounds(struct tetris_game_piece pc,
 				      unsigned char x, unsigned char y)
 {
@@ -75,6 +82,7 @@ static void new_piece(struct tetris_game *tgptr)
 
 struct tetris_game *new_tetris_game()
 {
+	seed_random();
 	struct tetris_game *tgptr = malloc(sizeof(struct tetris_game));
 	tgptr->npcidx = rand() % 7;
 	new_piece(tgptr);
