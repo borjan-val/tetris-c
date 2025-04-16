@@ -7,12 +7,12 @@
 struct termios orig_stdin;
 bool stdin_modified = 0;
 
-static inline void stdout_freeze()
+void stdout_freeze()
 {
 	tcflow(STDOUT_FILENO, TCOOFF);
 }
 
-static inline void stdout_thaw()
+void stdout_thaw()
 {
 	tcflow(STDOUT_FILENO, TCOON);
 }

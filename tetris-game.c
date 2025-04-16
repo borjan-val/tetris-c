@@ -2,24 +2,25 @@
 #include <stdlib.h>
 #include <time.h>
 
-inline bool cell_out_of_bounds(struct tetris_game_piece pc, unsigned char x,
-			       unsigned char y)
+static inline bool cell_out_of_bounds(struct tetris_game_piece pc,
+				      unsigned char x, unsigned char y)
 {
 	return PIECE_DATA[pc.idx][pc.idx][y][x] != 0 &&
 	       (pc.x + x >= 10 || pc.x + x < 0 || pc.y + y >= 20 ||
 		pc.y + y < 0);
 }
 
-inline bool cell_overlaps(struct tetris_game_piece pc,
-			  unsigned char board[20][10], unsigned char x,
-			  unsigned char y)
+static inline bool cell_overlaps(struct tetris_game_piece pc,
+				 unsigned char board[20][10], unsigned char x,
+				 unsigned char y)
 {
 	return PIECE_DATA[pc.idx][pc.rot][y][x] != 0 &&
 	       board[pc.y + y][pc.x + x] != 0;
 }
 
-inline void set_cell(struct tetris_game_piece pc, unsigned char board[20][10],
-		     unsigned char x, unsigned char y)
+static inline void set_cell(struct tetris_game_piece pc,
+			    unsigned char board[20][10], unsigned char x,
+			    unsigned char y)
 {
 	unsigned char cell = PIECE_DATA[pc.idx][pc.rot][y][x];
 	if (cell == 0)
@@ -28,7 +29,7 @@ inline void set_cell(struct tetris_game_piece pc, unsigned char board[20][10],
 	return;
 }
 
-bool collides(struct tetris_game_piece pc, unsigned char board[20][10])
+static bool collides(struct tetris_game_piece pc, unsigned char board[20][10])
 {
 	for (unsigned char y = 0; y < 4; y++) {
 		for (unsigned char x = 0; x < 4; x++) {
@@ -41,7 +42,7 @@ bool collides(struct tetris_game_piece pc, unsigned char board[20][10])
 	return 0;
 }
 
-bool line_full(unsigned char board[20][10], unsigned char y)
+static bool line_full(unsigned char board[20][10], unsigned char y)
 {
 	for (unsigned char x = 0; x < 10; x++) {
 		if (board[y][x] == 0)
@@ -50,7 +51,7 @@ bool line_full(unsigned char board[20][10], unsigned char y)
 	return 1;
 }
 
-void place_piece_down(struct tetris_game *tgptr)
+static void place_piece_down(struct tetris_game *tgptr)
 {
 	for (unsigned char y = 0; y < 4; y++) {
 		for (unsigned char x = 0; x < 4; x++) {
@@ -61,7 +62,7 @@ void place_piece_down(struct tetris_game *tgptr)
 	}
 }
 
-void new_piece(struct tetris_game *tgptr)
+static void new_piece(struct tetris_game *tgptr)
 {
 	struct tetris_game_piece newpc;
 	newpc.idx = tgptr->npcidx;
@@ -74,20 +75,17 @@ void new_piece(struct tetris_game *tgptr)
 
 struct tetris_game *new_tetris_game()
 {
-	struct timespec ts;
-	clock_gettime(CLOCK_MONOTONIC, &ts);
-	srand(ts.tv_sec + ts.tv_nsec);
-	struct tetris_game tg;
-	tg.npcidx = rand() % 7;
-	new_piece(&tg);
+	struct tetris_game *tgptr = malloc(sizeof(struct tetris_game));
+	tgptr->npcidx = rand() % 7;
+	new_piece(tgptr);
 	for (unsigned char y = 0; y < 20; y++) {
 		for (unsigned char x = 0; x < 10; x++) {
-			tg.board[y][x] = 0;
+			tgptr->board[y][x] = 0;
 		}
 	}
-	tg.lines = 0;
-	tg.score = 0;
-	return &tg;
+	tgptr->lines = 0;
+	tgptr->score = 0;
+	return tgptr;
 }
 
 struct tetris_game_result tetris_game_update(struct tetris_game *tgptr)
