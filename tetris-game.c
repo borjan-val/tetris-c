@@ -83,16 +83,20 @@ static void new_piece(struct tetris_game *tgptr)
 struct tetris_game *new_tetris_game()
 {
 	seed_random();
+
 	struct tetris_game *tgptr = malloc(sizeof(struct tetris_game));
 	tgptr->npcidx = rand() % 7;
 	new_piece(tgptr);
+
 	for (unsigned char y = 0; y < 20; y++) {
 		for (unsigned char x = 0; x < 10; x++) {
 			tgptr->board[y][x] = 0;
 		}
 	}
+
 	tgptr->lines = 0;
 	tgptr->score = 0;
+
 	return tgptr;
 }
 
@@ -102,14 +106,18 @@ struct tetris_game_result tetris_game_update(struct tetris_game *tgptr)
 	result.game_ended = 0;
 	result.piece_dropped = 0;
 	result.lines_cleared[0] = 0xFF;
+
 	struct tetris_game_piece nextpc = tgptr->pc;
 	nextpc.y++;
+
 	if (!collides(nextpc, tgptr->board)) {
 		tgptr->pc = nextpc;
 		return result;
 	}
+
 	place_piece_down(tgptr);
 	result.piece_dropped = 1;
+
 	unsigned char size = 0;
 	for (unsigned char y = tgptr->pc.y; y < tgptr->pc.y + 4; y++) {
 		if (line_full(tgptr->board, y)) {
@@ -120,8 +128,11 @@ struct tetris_game_result tetris_game_update(struct tetris_game *tgptr)
 	}
 	tgptr->score += CLEAR_REWARDS[size] * ((tgptr->lines / 10) + 1);
 	tgptr->lines += size;
+
 	new_piece(tgptr);
+
 	result.game_ended = collides(tgptr->pc, tgptr->board);
+	
 	return result;
 }
 
@@ -131,6 +142,7 @@ struct tetris_game_result tetris_game_input(struct tetris_game *tgptr,
 	struct tetris_game_result result;
 	result.game_ended = 0;
 	result.lines_cleared[0] = 0xFF;
+
 	struct tetris_game_piece nextpc = tgptr->pc;
 	switch (input) {
 	case MOVE_LEFT:
@@ -157,6 +169,7 @@ struct tetris_game_result tetris_game_input(struct tetris_game *tgptr,
 	default:
 		return result;
 	}
+	
 	if (!collides(nextpc, tgptr->board))
 		tgptr->pc = nextpc;
 	return result;
