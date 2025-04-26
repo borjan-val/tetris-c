@@ -1,43 +1,51 @@
 #ifndef TERM_UTILS_H
 #define TERM_UTILS_H
 
-#define ALT_BUF_ENABLE "\033[?1049h"
-#define ALT_BUF_DISABLE "\033[?1049l"
-#define CLEAR_BUF "\033[3J"
-#define RESET_CUR_POS "\033[1;1H"
-#define FG_BLACK "\033[30m"
-#define FG_RED "\033[31m"
-#define FG_GREEN "\033[32m"
-#define FG_YELLOW "\033[33m"
-#define FG_BLUE "\033[34m"
-#define FG_MAGENTA "\033[35m"
-#define FG_CYAN "\033[36m"
-#define FG_WHITE "\033[37m"
-#define BG_BLACK "\033[40m"
-#define BG_RED "\033[41m"
-#define BG_GREEN "\033[42m"
-#define BG_YELLOW "\033[43m"
-#define BG_BLUE "\033[44m"
-#define BG_MAGENTA "\033[45m"
-#define BG_CYAN "\033[46m"
-#define BG_WHITE "\033[47m"
+// Store a fixed-size string
+// WARNING: DO NOT EXPECT NULL TERMINATION!
+struct str {
+	char *arr;
+	unsigned short len;
+};
 
-// Pause output
-void stdout_freeze();
+// Possible terminal colors
+enum term_color {
+	BLACK = 0,
+	RED = 1,
+	GREEN = 2,
+	YELLOW = 3,
+	BLUE = 4,
+	MAGENTA = 5,
+	CYAN = 6,
+	WHITE = 7,
+	UNSET = 9
+};
 
-// Resume output
-void stdout_thaw();
+// Print to the term-utils window
+void t_print(struct str str);
 
-// Ensure all terminal changes are undone on exit.
-void prep_term_utils();
+// Print single character to the term-utils window
+void t_printc(char c);
 
-// Reset terminal
-void undo_term_utils();
+// Read a string from the term-utils window
+struct str t_read();
 
-// Switch terminal to raw mode to intercept input directly
-void stdin_raw();
+// Set text color of term-utils window
+void t_fg_color(enum term_color color);
 
-// Restore default terminal behaviour (usually cooked mode)
-void stdin_revert();
+// Set text background color of term-utils window
+void t_bg_color(enum term_color color);
+
+// Open term-utils window and configure automatic cleanup on close
+void t_register();
+
+// Freeze term-utils window output
+void t_freeze();
+
+// Unfreeze ("thaw") term-utils window output
+void t_thaw();
+
+// Clear term-utils window
+void t_reset();
 
 #endif
