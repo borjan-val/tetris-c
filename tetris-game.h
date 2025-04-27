@@ -68,6 +68,14 @@ enum tetris_game_input {
 	ROTATE_CCW
 };
 
+// Copy a game board from src to dest
+void copy_board(unsigned char (*dest)[20][10],
+		const unsigned char (*src)[20][10]);
+
+// Place a piece down on a game board
+void place_piece_down(struct tetris_game_piece pc,
+		      unsigned char (*board)[20][10]);
+
 // Create a new Tetris game
 struct tetris_game *new_tetris_game();
 
