@@ -124,12 +124,7 @@ output:
 
 void t_printc(char c)
 {
-	struct str str;
-	str.arr = malloc(1);
-	str.arr[0] = c;
-	str.len = 1;
-	t_print(str);
-	free(str.arr);
+	t_print((struct str){ &c, 1 });
 }
 
 struct str t_read()
@@ -180,12 +175,10 @@ void t_freeze()
 void t_thaw()
 {
 	t_frozen = 0;
-	struct str str = { 0, 0 };
-	t_print(str);
+	t_print((struct str){ NULL, 0 });
 }
 
 void t_reset()
 {
-	struct str str = { RESET_BUF, 10 };
-	t_print(str);
+	t_print((struct str){ RESET_BUF, 10 });
 }
