@@ -11,8 +11,8 @@
 #define RESET_BUF "\033[2J\033[1;1H"
 
 static struct termios orig_stdin;
-static bool t_reg = 0;
-static bool t_frozen = 0;
+static unsigned char t_reg = 0;
+static unsigned char t_frozen = 0;
 
 static inline void enable_alt_buf()
 {
@@ -24,7 +24,7 @@ static inline void disable_alt_buf()
 	write(STDOUT_FILENO, ALT_BUF_DISABLE, 8);
 }
 
-static struct str color_str_builder(enum term_color color, bool bg)
+static struct str color_str_builder(enum term_color color, unsigned char bg)
 {
 	struct str str;
 	str.arr = malloc(5);

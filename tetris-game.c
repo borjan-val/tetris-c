@@ -17,22 +17,20 @@ static const unsigned char EMPTY_BOARD[20][10] = {
 
 static inline void seed_random()
 {
-	struct timespec ts;
-	timespec_get(&ts, TIME_UTC);
-	srand(ts.tv_sec + ts.tv_nsec);
+	srand(time(NULL) + clock());
 }
 
-static inline bool cell_out_of_bounds(struct tetris_game_piece pc,
-				      unsigned char x, unsigned char y)
+static inline unsigned char cell_out_of_bounds(struct tetris_game_piece pc,
+					       unsigned char x, unsigned char y)
 {
 	return PIECE_DATA[pc.idx][pc.idx][y][x] != 0 &&
 	       (pc.x + x >= 10 || pc.x + x < 0 || pc.y + y >= 20 ||
 		pc.y + y < 0);
 }
 
-static inline bool cell_overlaps(struct tetris_game_piece pc,
-				 unsigned char (*board)[20][10],
-				 unsigned char x, unsigned char y)
+static inline unsigned char cell_overlaps(struct tetris_game_piece pc,
+					  unsigned char (*board)[20][10],
+					  unsigned char x, unsigned char y)
 {
 	return PIECE_DATA[pc.idx][pc.rot][y][x] != 0 &&
 	       (*board)[pc.y + y][pc.x + x] != 0;
@@ -49,8 +47,8 @@ static inline void set_cell(struct tetris_game_piece pc,
 	return;
 }
 
-static bool collides(struct tetris_game_piece pc,
-		     unsigned char (*board)[20][10])
+static unsigned char collides(struct tetris_game_piece pc,
+			      unsigned char (*board)[20][10])
 {
 	for (unsigned char y = 0; y < 4; y++) {
 		for (unsigned char x = 0; x < 4; x++) {
@@ -63,7 +61,7 @@ static bool collides(struct tetris_game_piece pc,
 	return 0;
 }
 
-static bool line_full(unsigned char (*board)[20][10], unsigned char y)
+static unsigned char line_full(unsigned char (*board)[20][10], unsigned char y)
 {
 	for (unsigned char x = 0; x < 10; x++) {
 		if ((*board)[y][x] == 0)
@@ -176,11 +174,11 @@ struct tetris_game_result tetris_game_input(struct tetris_game *tgptr,
 		nextpc.y++;
 		break;
 	case HARD_DROP:
-		struct tetris_game_result r = tetris_game_update(tgptr);
-		while (!r.piece_dropped) {
-			r = tetris_game_update(tgptr);
+		result.piece_dropped = 0;
+		while (!result.piece_dropped) {
+			result = tetris_game_update(tgptr);
 		}
-		return r;
+		return result;
 	case ROTATE_CW:
 		nextpc.rot = (nextpc.rot + 1) % 4;
 		break;

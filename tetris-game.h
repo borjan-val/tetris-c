@@ -53,8 +53,8 @@ struct tetris_game {
 
 // Store info about the result of a game step or input
 struct tetris_game_result {
-	bool game_ended;
-	bool piece_dropped;
+	unsigned char game_ended;
+	unsigned char piece_dropped;
 	unsigned char lines_cleared[4];
 };
 
