@@ -73,8 +73,8 @@ void copy_board(unsigned char (*dest)[20][10],
 		const unsigned char (*src)[20][10]);
 
 // Place a piece down on a game board
-void place_piece_down(struct tetris_game_piece pc,
-		      unsigned char (*board)[20][10]);
+void place_piece_down(unsigned char (*board)[20][10],
+		      struct tetris_game_piece pc);
 
 // Create a new Tetris game
 struct tetris_game *new_tetris_game();

@@ -91,8 +91,8 @@ void copy_board(unsigned char (*dest)[20][10],
 	}
 }
 
-void place_piece_down(struct tetris_game_piece pc,
-		      unsigned char (*board)[20][10])
+void place_piece_down(unsigned char (*board)[20][10],
+		      struct tetris_game_piece pc)
 {
 	for (unsigned char y = 0; y < 4; y++) {
 		for (unsigned char x = 0; x < 4; x++) {
@@ -134,7 +134,7 @@ struct tetris_game_result tetris_game_update(struct tetris_game *tgptr)
 		return result;
 	}
 
-	place_piece_down(tgptr->pc, &tgptr->board);
+	place_piece_down(&tgptr->board, tgptr->pc);
 	result.piece_dropped = 1;
 
 	unsigned char size = 0;
