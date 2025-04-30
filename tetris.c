@@ -64,15 +64,41 @@ static const enum tetris_game_input KEYMAP[256] = {
 	INVALID, INVALID,   INVALID,	INVALID
 };
 
+static const unsigned char EMPTY_SHADOW[10] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+static void copy_shadow(unsigned char (*dest)[10],
+			const unsigned char (*src)[10])
+{
+	for (unsigned char x = 0; x < 10; x++) {
+		(*dest)[x] = (*src)[x];
+	}
+}
+
+static void get_shadow(unsigned char (*dest)[10], struct tetris_game_piece pc)
+{
+	copy_shadow(dest, &EMPTY_SHADOW);
+	for (unsigned char x = 0; x < 10; x++) {
+		if (x < pc.x || x > pc.x + 3)
+			continue;
+		for (unsigned char y = 0; y < 4; y++) {
+			if (PIECE_DATA[pc.idx][pc.rot][y][x - pc.x] != 0) {
+				(*dest)[x] = 1;
+				break;
+			}
+		}
+	}
+}
+
 static void render_state(enum term_color (*board)[20][10],
-			 enum term_color (*npcmat)[4][4], unsigned char level,
-			 unsigned int score)
+			 enum term_color (*npcmat)[4][4],
+			 const unsigned char (*pshadow)[10],
+			 unsigned char level, unsigned int score)
 {
 	t_freeze();
 	t_reset();
-	t_print((struct str){ "╔════════════════════╤════════╗\n", 94 });
+	t_print((struct str){ "┏━━━━━━━━━━━━━━━━━━━━┯━━━━━━━━┓\n", 94 });
 	for (unsigned char y = 0; y < 20; y++) {
-		t_print((struct str){ "║", 3 });
+		t_print((struct str){ "┃", 3 });
 
 		for (unsigned char x = 0; x < 10; x++) {
 			t_bg_color((*board)[y][x]);
@@ -81,7 +107,7 @@ static void render_state(enum term_color (*board)[20][10],
 		t_bg_color(UNSET);
 
 		if (y == 5) {
-			t_print((struct str){ "├────────╢\n", 31 });
+			t_print((struct str){ "├────────┨\n", 31 });
 			continue;
 		}
 
@@ -93,7 +119,7 @@ static void render_state(enum term_color (*board)[20][10],
 				t_print((struct str){ "  ", 2 });
 			}
 			t_bg_color(UNSET);
-			t_print((struct str){ "║\n", 4 });
+			t_print((struct str){ "┃\n", 4 });
 			continue;
 		}
 
@@ -121,9 +147,17 @@ static void render_state(enum term_color (*board)[20][10],
 			break;
 		}
 
-		t_print((struct str){ "║\n", 4 });
+		t_print((struct str){ "┃\n", 4 });
 	}
-	t_print((struct str){ "╚════════════════════╧════════╝\n", 94 });
+	t_print((struct str){ "┗", 3 });
+	for (unsigned char x = 0; x < 10; x++) {
+		if ((*pshadow)[x])
+			t_print((struct str){ "╍╍", 6 });
+		else
+			t_print((struct str){ "━━", 6 });
+	}
+	t_print((struct str){ "┷━━━━━━━━┛\n", 31 });
+
 	t_thaw();
 }
 
@@ -199,7 +233,8 @@ static void render_result(struct tetris_game *tgptr,
 	map_board(&tboard, &rboard);
 	mboard_insert_clear_lines(&tboard, &result.lines_cleared);
 
-	render_state(&tboard, &npcmat, tgptr->lines / 10, tgptr->score);
+	render_state(&tboard, &npcmat, &EMPTY_SHADOW, tgptr->lines / 10,
+		     tgptr->score);
 
 	unsigned char lctr = 0;
 
@@ -212,7 +247,8 @@ static void render_result(struct tetris_game *tgptr,
 			tboard[result.lines_cleared[j]][5 + i] = UNSET;
 		}
 		mssleep(50);
-		render_state(&tboard, &npcmat, tgptr->lines / 10, tgptr->score);
+		render_state(&tboard, &npcmat, &EMPTY_SHADOW, tgptr->lines / 10,
+			     tgptr->score);
 	}
 	mssleep(50);
 
@@ -222,7 +258,11 @@ no_clear_anim:
 	enum term_color mboard[20][10];
 	map_board(&mboard, &rboard);
 
-	render_state(&mboard, &npcmat, tgptr->lines / 10, tgptr->score);
+	unsigned char shadow[10];
+	get_shadow(&shadow, tgptr->pc);
+
+	render_state(&mboard, &npcmat, &shadow, tgptr->lines / 10,
+		     tgptr->score);
 }
 
 int main()
@@ -230,7 +270,7 @@ int main()
 	t_register();
 
 	struct tetris_game *tgptr = new_tetris_game();
-	render_result(tgptr, (struct tetris_game_result){0, 0, {0xFF}});
+	render_result(tgptr, (struct tetris_game_result){ 0, 0, { 0xFF } });
 
 	while (1) {
 		unsigned char f = (tgptr->lines / 10 < 29) ?
