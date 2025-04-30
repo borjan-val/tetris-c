@@ -176,6 +176,9 @@ struct tetris_game_result tetris_game_input(struct tetris_game *tgptr,
 
 	struct tetris_game_piece nextpc = tgptr->pc;
 	switch (input) {
+	case QUIT:
+		exit(0);
+		return result;
 	case MOVE_LEFT:
 		nextpc.x--;
 		break;
