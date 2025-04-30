@@ -70,6 +70,17 @@ static unsigned char line_full(unsigned char (*board)[20][10], unsigned char y)
 	return 1;
 }
 
+static void clear_line(unsigned char (*board)[20][10], unsigned char y) {
+	for (unsigned char i = y; i > 0; i--) {
+		for (unsigned char x = 0; x < 10; x++) {
+			(*board)[i][x] = (*board)[i - 1][x];
+		}
+	}
+	for (unsigned char x = 0; x < 10; x++) {
+		(*board)[0][x] = 0;
+	}
+}
+
 static void new_piece(struct tetris_game *tgptr)
 {
 	struct tetris_game_piece newpc;
@@ -140,6 +151,7 @@ struct tetris_game_result tetris_game_update(struct tetris_game *tgptr)
 	unsigned char size = 0;
 	for (unsigned char y = tgptr->pc.y; y < tgptr->pc.y + 4; y++) {
 		if (line_full(&tgptr->board, y)) {
+			clear_line(&tgptr->board, y);
 			result.lines_cleared[size] = y;
 			if (++size < 4)
 				result.lines_cleared[size] = 0xFF;
