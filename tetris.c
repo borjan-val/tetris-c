@@ -271,6 +271,26 @@ no_clear_anim:
 	render_state(&mboard, &npcmat, &shadow, tgptr->lines, tgptr->score);
 }
 
+static void handle_input(struct tetris_game *tgptr, char c)
+{
+	enum tetris_game_input i = KEYMAP[(unsigned char)c];
+
+	struct tetris_game_result r;
+	switch (i) {
+	case QUIT:
+		exit(0);
+		break;
+	case INVALID:
+		return;
+	default:
+		r = tetris_game_input(tgptr, i);
+		render_result(tgptr, r);
+		if (r.game_ended)
+			exit(0);
+		break;
+	}
+}
+
 int main()
 {
 	t_register();
@@ -286,13 +306,7 @@ int main()
 			mssleep(17);
 			struct str str = t_read();
 			for (unsigned short i = 0; i < str.len; i++) {
-				struct tetris_game_result r;
-				enum tetris_game_input input =
-					KEYMAP[(unsigned char)str.arr[i]];
-				r = tetris_game_input(tgptr, input);
-				if (r.game_ended)
-					exit(0);
-				render_result(tgptr, r);
+				handle_input(tgptr, str.arr[i]);
 			}
 			if (str.len > 0)
 				free(str.arr);
