@@ -63,6 +63,8 @@ static unsigned char collides(struct tetris_game_piece pc,
 
 static unsigned char line_full(unsigned char (*board)[20][10], unsigned char y)
 {
+	if (y > 19)
+		return 0;
 	for (unsigned char x = 0; x < 10; x++) {
 		if ((*board)[y][x] == 0)
 			return 0;
