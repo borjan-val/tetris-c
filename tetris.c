@@ -92,7 +92,7 @@ static void get_shadow(unsigned char (*dest)[10], struct tetris_game_piece pc)
 static void render_state(enum term_color (*board)[20][10],
 			 enum term_color (*npcmat)[4][4],
 			 const unsigned char (*pshadow)[10],
-			 unsigned char level, unsigned int score)
+			 unsigned short lines, unsigned int score)
 {
 	t_freeze();
 	t_reset();
@@ -128,11 +128,18 @@ static void render_state(enum term_color (*board)[20][10],
 		case 4:
 			t_print((struct str){ "  NEXT  ", 8 });
 			break;
-		case 15:
+		case 12:
 			t_print((struct str){ "Level:  ", 8 });
 			break;
+		case 13:
+			snprintf(linebuf, 9, "%-8u", lines / 10);
+			t_print((struct str){ linebuf, 8 });
+			break;
+		case 15:
+			t_print((struct str){ "Lines:  ", 8 });
+			break;
 		case 16:
-			snprintf(linebuf, 9, "%-8u", level);
+			snprintf(linebuf, 9, "%-8u", lines);
 			t_print((struct str){ linebuf, 8 });
 			break;
 		case 18:
@@ -233,7 +240,7 @@ static void render_result(struct tetris_game *tgptr,
 	map_board(&tboard, &rboard);
 	mboard_insert_clear_lines(&tboard, &result.lines_cleared);
 
-	render_state(&tboard, &npcmat, &EMPTY_SHADOW, tgptr->lines / 10,
+	render_state(&tboard, &npcmat, &EMPTY_SHADOW, tgptr->lines,
 		     tgptr->score);
 
 	unsigned char lctr = 0;
@@ -247,7 +254,7 @@ static void render_result(struct tetris_game *tgptr,
 			tboard[result.lines_cleared[j]][5 + i] = UNSET;
 		}
 		mssleep(50);
-		render_state(&tboard, &npcmat, &EMPTY_SHADOW, tgptr->lines / 10,
+		render_state(&tboard, &npcmat, &EMPTY_SHADOW, tgptr->lines,
 			     tgptr->score);
 	}
 	mssleep(50);
@@ -261,8 +268,7 @@ no_clear_anim:
 	unsigned char shadow[10];
 	get_shadow(&shadow, tgptr->pc);
 
-	render_state(&mboard, &npcmat, &shadow, tgptr->lines / 10,
-		     tgptr->score);
+	render_state(&mboard, &npcmat, &shadow, tgptr->lines, tgptr->score);
 }
 
 int main()
