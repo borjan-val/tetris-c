@@ -23,7 +23,7 @@ static inline void seed_random()
 static inline unsigned char cell_out_of_bounds(struct tetris_game_piece pc,
 					       unsigned char x, unsigned char y)
 {
-	return PIECE_DATA[pc.idx][pc.idx][y][x] != 0 &&
+	return PIECE_DATA[pc.idx][pc.rot][y][x] != 0 &&
 	       (pc.x + x >= 10 || pc.x + x < 0 || pc.y + y >= 20 ||
 		pc.y + y < 0);
 }
