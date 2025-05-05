@@ -36,6 +36,9 @@ void t_fg_color(enum term_color color);
 // Set text background color of term-utils window
 void t_bg_color(enum term_color color);
 
+// Go to a given position of the term-utils window
+void t_goto(unsigned char col, unsigned char row);
+
 // Open term-utils window and configure automatic cleanup on close
 void t_register();
 

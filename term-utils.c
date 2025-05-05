@@ -167,6 +167,26 @@ void t_bg_color(enum term_color color)
 	free(str.arr);
 }
 
+void t_goto(unsigned char col, unsigned char row) {
+	struct str str;
+	str.arr = malloc(11);
+	str.arr[0] = '\033';
+	str.arr[1] = '[';
+	snprintf(str.arr + 2, 4, "%u", row + 1);
+	unsigned char a = 4 + (row > 8) + (row > 98);
+	str.arr[a] = ';';
+	snprintf(str.arr + a + 1, 4, "%u", col + 1);
+	unsigned char b = a + 2 + (col > 8) + (col > 98);
+	str.arr[b] = 'H';
+	if (b < 10)
+		str.arr = realloc(str.arr, b + 1);
+	str.len = b + 1;
+
+	t_print(str);
+
+	free(str.arr);
+}
+
 void t_freeze()
 {
 	t_frozen = 1;
