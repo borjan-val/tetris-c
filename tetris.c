@@ -32,12 +32,12 @@ static const enum tetris_game_input KEYMAP[256] = {
 	INVALID, INVALID,   INVALID,	INVALID,    INVALID,	MOVE_LEFT,
 	INVALID, INVALID,   MOVE_RIGHT, ROTATE_CW,  INVALID,	INVALID,
 	INVALID, INVALID,   INVALID,	INVALID,    INVALID,	INVALID,
-	INVALID, INVALID,   INVALID,	ROTATE_CCW, INVALID,	SOFT_DROP,
+	INVALID, INVALID,   PAUSE,	ROTATE_CCW, INVALID,	SOFT_DROP,
 	INVALID, INVALID,   INVALID,	INVALID,    INVALID,	INVALID,
 	INVALID, INVALID,   INVALID,	INVALID,    INVALID,	INVALID,
 	INVALID, MOVE_LEFT, INVALID,	INVALID,    MOVE_RIGHT, ROTATE_CW,
 	INVALID, INVALID,   INVALID,	INVALID,    INVALID,	INVALID,
-	INVALID, INVALID,   INVALID,	INVALID,    INVALID,	ROTATE_CCW,
+	INVALID, INVALID,   INVALID,	INVALID,    PAUSE,	ROTATE_CCW,
 	INVALID, SOFT_DROP, INVALID,	INVALID,    INVALID,	INVALID,
 	INVALID, INVALID,   INVALID,	INVALID,    INVALID,	INVALID,
 	INVALID, INVALID,   INVALID,	INVALID,    INVALID,	INVALID,
@@ -271,17 +271,70 @@ no_clear_anim:
 	render_state(&mboard, &npcmat, &shadow, tgptr->lines, tgptr->score);
 }
 
+static void render_resultless(struct tetris_game *tgptr)
+{
+	render_result(tgptr, (struct tetris_game_result){ 0, 0, { 0xFF } });
+}
+
+static void pause_game(struct tetris_game *tgptr)
+{
+	render_resultless(tgptr);
+
+	t_freeze();
+
+	t_goto(2, 8);
+	t_bg_color(UNSET);
+	t_print((struct str){ "╔════════════════╗", 54 });
+	t_goto(2, 9);
+	t_bg_color(UNSET);
+	t_print((struct str){ "║     PAUSED     ║", 22 });
+	t_goto(2, 10);
+	t_bg_color(UNSET);
+	t_print((struct str){ "║ [P] to resume! ║", 22 });
+	t_goto(2, 11);
+	t_bg_color(UNSET);
+	t_print((struct str){ "╚════════════════╝", 54 });
+	t_goto(0, 22);
+
+	t_thaw();
+
+	while (1) {
+		struct str s = t_read();
+		if (s.len > 0) {
+			for (unsigned short n = 0; n < s.len; n++) {
+				switch (KEYMAP[(unsigned char)s.arr[n]]) {
+				case PAUSE:
+					free(s.arr);
+					render_resultless(tgptr);
+					return;
+				case QUIT:
+					exit(0);
+					return;
+				default:
+					break;
+				}
+			}
+		}
+		if (s.len > 0)
+			free(s.arr);
+		mssleep(17);
+	}
+}
+
 static void handle_input(struct tetris_game *tgptr, char c)
 {
 	enum tetris_game_input i = KEYMAP[(unsigned char)c];
 
 	struct tetris_game_result r;
 	switch (i) {
+	case INVALID:
+		return;
+	case PAUSE:
+		pause_game(tgptr);
+		return;
 	case QUIT:
 		exit(0);
 		break;
-	case INVALID:
-		return;
 	default:
 		r = tetris_game_input(tgptr, i);
 		render_result(tgptr, r);

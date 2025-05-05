@@ -61,6 +61,7 @@ struct tetris_game_result {
 // Possible inputs for a game
 enum tetris_game_input {
 	INVALID,
+	PAUSE,
 	QUIT,
 	MOVE_LEFT,
 	MOVE_RIGHT,
