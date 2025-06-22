@@ -15,11 +15,14 @@ static const unsigned char EMPTY_BOARD[20][10] = {
 	{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
 };
 
+// Seed the pRNG with a new time-based integer
 static inline void seed_random()
 {
 	srand(time(NULL) + clock());
 }
 
+// Check whether the given piece has a non-empty cell outside of the game board
+// at the given relative coordinates
 static inline unsigned char cell_out_of_bounds(struct tetris_game_piece pc,
 					       unsigned char x, unsigned char y)
 {
@@ -28,6 +31,8 @@ static inline unsigned char cell_out_of_bounds(struct tetris_game_piece pc,
 		pc.y + y < 0);
 }
 
+// Check whether both the given piece and the given game board have a non-empty
+// cell at the given coordinates
 static inline unsigned char cell_overlaps(struct tetris_game_piece pc,
 					  unsigned char (*board)[20][10],
 					  unsigned char x, unsigned char y)
@@ -36,6 +41,8 @@ static inline unsigned char cell_overlaps(struct tetris_game_piece pc,
 	       (*board)[pc.y + y][pc.x + x] != 0;
 }
 
+// Set a game board cell corresponding to a set of relative coordinates and a
+// piece to the corresponding piece cell if that piece cell is not empty
 static inline void set_cell(struct tetris_game_piece pc,
 			    unsigned char (*board)[20][10], unsigned char x,
 			    unsigned char y)
@@ -47,6 +54,7 @@ static inline void set_cell(struct tetris_game_piece pc,
 	return;
 }
 
+// Check whether a piece collides with the given game board
 static unsigned char collides(struct tetris_game_piece pc,
 			      unsigned char (*board)[20][10])
 {
@@ -61,6 +69,7 @@ static unsigned char collides(struct tetris_game_piece pc,
 	return 0;
 }
 
+// Check whether all cells on a given line of a given board are non-empty
 static unsigned char line_full(unsigned char (*board)[20][10], unsigned char y)
 {
 	if (y > 19)
@@ -72,6 +81,8 @@ static unsigned char line_full(unsigned char (*board)[20][10], unsigned char y)
 	return 1;
 }
 
+// Do a "line clear" by shifting down the lines above and setting the topmost
+// line to all empty cells
 static void clear_line(unsigned char (*board)[20][10], unsigned char y) {
 	for (unsigned char i = y; i > 0; i--) {
 		for (unsigned char x = 0; x < 10; x++) {
@@ -83,6 +94,9 @@ static void clear_line(unsigned char (*board)[20][10], unsigned char y) {
 	}
 }
 
+// Replace the current piece of a Tetris game with the next piece, position it
+// at the top of the board in default rotation and generate a new random
+// "next piece" to succeed the new current piece.
 static void new_piece(struct tetris_game *tgptr)
 {
 	struct tetris_game_piece newpc;
@@ -94,6 +108,7 @@ static void new_piece(struct tetris_game *tgptr)
 	tgptr->npcidx = rand() % 7;
 }
 
+// Copy all cells of a source game board to a destination game board
 void copy_board(unsigned char (*dest)[20][10],
 		const unsigned char (*src)[20][10])
 {
@@ -104,6 +119,7 @@ void copy_board(unsigned char (*dest)[20][10],
 	}
 }
 
+// Place a piece on a game board
 void place_piece_down(unsigned char (*board)[20][10],
 		      struct tetris_game_piece pc)
 {
@@ -116,6 +132,7 @@ void place_piece_down(unsigned char (*board)[20][10],
 	}
 }
 
+// Prepare a new Tetris game and return its pointer
 struct tetris_game *new_tetris_game()
 {
 	seed_random();
@@ -132,13 +149,16 @@ struct tetris_game *new_tetris_game()
 	return tgptr;
 }
 
+// Step a Tetris game forward in time
 struct tetris_game_result tetris_game_update(struct tetris_game *tgptr)
 {
+	// Prepare a result struct to be returned
 	struct tetris_game_result result;
 	result.game_ended = 0;
 	result.piece_dropped = 0;
 	result.lines_cleared[0] = 0xFF;
 
+	// Check whether the current piece can simply fall downwards one cell
 	struct tetris_game_piece nextpc = tgptr->pc;
 	nextpc.y++;
 
@@ -147,9 +167,13 @@ struct tetris_game_result tetris_game_update(struct tetris_game *tgptr)
 		return result;
 	}
 
+	// The piece can't fall; it needs to be "dropped" and the game needs to
+	// move on to the next piece
 	place_piece_down(&tgptr->board, tgptr->pc);
 	result.piece_dropped = 1;
 
+	// Check if dropping the piece resulted in any lines being filled and
+	// clear them
 	unsigned char size = 0;
 	for (unsigned char y = tgptr->pc.y; y < tgptr->pc.y + 4; y++) {
 		if (line_full(&tgptr->board, y)) {
@@ -162,13 +186,17 @@ struct tetris_game_result tetris_game_update(struct tetris_game *tgptr)
 	tgptr->score += CLEAR_REWARDS[size] * ((tgptr->lines / 10) + 1);
 	tgptr->lines += size;
 
+	// We're done placing down the current piece, get a new one
 	new_piece(tgptr);
 
+	// If a piece is already in an invalid position when entering the
+	// game, the game has ended
 	result.game_ended = collides(tgptr->pc, &tgptr->board);
 
 	return result;
 }
 
+// Handle an input and modify the game state accordingly
 struct tetris_game_result tetris_game_input(struct tetris_game *tgptr,
 					    enum tetris_game_input input)
 {
@@ -176,6 +204,10 @@ struct tetris_game_result tetris_game_input(struct tetris_game *tgptr,
 	result.game_ended = 0;
 	result.lines_cleared[0] = 0xFF;
 
+	// Depending on the input, the current piece will end up in a different
+	// position; create a copy of the current piece and check whether it
+	// would collide or end up in a valid position (with the exception of
+	// a hard drop)
 	struct tetris_game_piece nextpc = tgptr->pc;
 	switch (input) {
 	case MOVE_LEFT:
@@ -188,6 +220,8 @@ struct tetris_game_result tetris_game_input(struct tetris_game *tgptr,
 		nextpc.y++;
 		break;
 	case HARD_DROP:
+		// Drop the piece as far as it will go - no further action is
+		// required afterwards, return immediately
 		result.piece_dropped = 0;
 		while (!result.piece_dropped) {
 			result = tetris_game_update(tgptr);
@@ -200,9 +234,14 @@ struct tetris_game_result tetris_game_input(struct tetris_game *tgptr,
 		nextpc.rot = (nextpc.rot + 3) % 4;
 		break;
 	default:
+		// If the input is invalid, we don't move our copy of the
+		// current piece and thus don't even need to bother checking
+		// its collision, we can return immediately
 		return result;
 	}
 
+	// Check if our piece copy ends up in a valid position and apply our
+	// changes to the real piece if that is the case
 	if (!collides(nextpc, &tgptr->board))
 		tgptr->pc = nextpc;
 	return result;
