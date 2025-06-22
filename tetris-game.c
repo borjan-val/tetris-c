@@ -108,7 +108,6 @@ static void new_piece(struct tetris_game *tgptr)
 	tgptr->npcidx = rand() % 7;
 }
 
-// Copy all cells of a source game board to a destination game board
 void copy_board(unsigned char (*dest)[20][10],
 		const unsigned char (*src)[20][10])
 {
@@ -119,7 +118,6 @@ void copy_board(unsigned char (*dest)[20][10],
 	}
 }
 
-// Place a piece on a game board
 void place_piece_down(unsigned char (*board)[20][10],
 		      struct tetris_game_piece pc)
 {
@@ -132,7 +130,6 @@ void place_piece_down(unsigned char (*board)[20][10],
 	}
 }
 
-// Prepare a new Tetris game and return its pointer
 struct tetris_game *new_tetris_game()
 {
 	seed_random();
@@ -149,7 +146,6 @@ struct tetris_game *new_tetris_game()
 	return tgptr;
 }
 
-// Step a Tetris game forward in time
 struct tetris_game_result tetris_game_update(struct tetris_game *tgptr)
 {
 	// Prepare a result struct to be returned
@@ -196,7 +192,6 @@ struct tetris_game_result tetris_game_update(struct tetris_game *tgptr)
 	return result;
 }
 
-// Handle an input and modify the game state accordingly
 struct tetris_game_result tetris_game_input(struct tetris_game *tgptr,
 					    enum tetris_game_input input)
 {
